@@ -8,8 +8,11 @@ public class Tarea12 {
     public static String obtenerPalabraAdivinada(String palabraSecreta, boolean[] letrasAdivinadas) {
         StringBuilder palabraAdivinada = new StringBuilder();
         for (int i = 0; i < palabraSecreta.length(); i++) {
-            if (letrasAdivinadas[i]) {
-                palabraAdivinada.append(palabraSecreta.charAt(i));
+            char letra = palabraSecreta.charAt(i);
+            if (letra == ' ') {
+                palabraAdivinada.append(" "); // Mostrar el espacio
+            } else if (letrasAdivinadas[i]) {
+                palabraAdivinada.append(letra);
             } else {
                 palabraAdivinada.append("_");
             }
