@@ -1,17 +1,20 @@
-import java.util.Random;
-import java.util.Vector;
+import java.awt.HeadlessException;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
-import java.util.Collections;
+
+import javax.swing.JOptionPane;
 
 public class MetodosDeOrdenamiento {
-
     static int nextPos, currentPos;
     static long mov, com;
 
-    public static void bubbleSort(int A[]) {
+    public static int[] bubbleSort(int A[]) {
         for (int i = 0; i < A.length; i++) 
         {
-            
             for(int j = 0; j < A.length - 1; j++) 
             {
                 currentPos = A[j];
@@ -24,13 +27,12 @@ public class MetodosDeOrdenamiento {
                     A[j+1] = currentPos;
                     mov++;
                 }
-
             }
-
         }
+        return A;
     }
 
-    public static void insertionSort(int A[]) {
+    public static int[] insertionSort(int A[]) {
         for(int i = 1; i < A.length; i++) {
             currentPos = A[i];
             int j = i-1;
@@ -44,9 +46,10 @@ public class MetodosDeOrdenamiento {
             com++;
             mov++;
         }
+        return A;
     }
 
-    public static void selectionSort(int A[]) {
+    public static int[] selectionSort(int A[]) {
         for (int i = 0; i < A.length - 1; i++) {
             int men = i;
             for (int j = i + 1; j < A.length; j++) {
@@ -60,14 +63,16 @@ public class MetodosDeOrdenamiento {
             A[men] = aux;
             mov++;
         }
+        return A;
     }
 
-    public static void quickSort(int[] A, int left, int right) {
+    public static int[] quickSort(int[] A, int left, int right) {
         if (left < right) {
             int pivotIndex = partition(A, left, right);
             quickSort(A, left, pivotIndex - 1);
             quickSort(A, pivotIndex + 1, right);
         }
+        return A;
     }
 
     public static int partition(int A[], int left, int right) {
@@ -93,10 +98,7 @@ public class MetodosDeOrdenamiento {
         return i + 1;
     }
 
-    public static void binSort(float A[], int size) {
-        if (size <= 0) {
-            return;
-        }
+    public static float[] binSort(float A[], int size) {
         @SuppressWarnings("unchecked")
         Vector<Float>[] bins = new Vector[size];
 
@@ -122,11 +124,13 @@ public class MetodosDeOrdenamiento {
                 mov += bins[i].size() - 1;
             }
         }
-
+        return A;
     }
-    public static void mergeSort(int[] arr) {
+
+    public static int[] mergeSort(int[] arr) {
         int[] temp = new int[arr.length];
         mergeSort(arr, temp, 0, arr.length - 1);
+        return arr;
     }
 
     private static void mergeSort(int[] arr, int[] temp, int left, int right) {
@@ -169,11 +173,12 @@ public class MetodosDeOrdenamiento {
         }
     }
 
-    public static void radixSort(int[] arr) {
+    public static int[] radixSort(int[] arr) {
         int max = Arrays.stream(arr).max().getAsInt();
         for (int exp = 1; max / exp > 0; exp *= 10) {
             countSort(arr, exp);
         }
+        return arr;
     }
 
     private static void countSort(int[] arr, int exp) {
@@ -204,7 +209,7 @@ public class MetodosDeOrdenamiento {
         }
     }
 
-    public static void heapSort(int[] arr) {
+    public static int[] heapSort(int[] arr) {
         PriorityQueue<Integer> minHeap = new PriorityQueue<>(Comparator.comparingInt(x -> x));
         for (int value : arr) {
             minHeap.add(value);
@@ -215,9 +220,10 @@ public class MetodosDeOrdenamiento {
             arr[i] = minHeap.poll();
             mov++;
         }
+        return arr;
     }
 
-    public static void binaryTreeSort(int[] arr) {
+    public static int[] binaryTreeSort(int[] arr) {
         TreeSet<Integer> treeSet = new TreeSet<>();
         for (int value : arr) {
             treeSet.add(value);
@@ -230,9 +236,10 @@ public class MetodosDeOrdenamiento {
             mov++;
             index++;
         }
+        return arr;
     }
 
-    public static void shellSort(int[] arr) {
+    public static int[] shellSort(int[] arr) {
         int n = arr.length;
         for (int gap = n / 2; gap > 0; gap /= 2) {
             for (int i = gap; i < n; i++) {
@@ -247,15 +254,93 @@ public class MetodosDeOrdenamiento {
                 mov++;
             }
         }
+        return arr;
     }
 
-    public static String getMovAndCom() {
-        return "Movimientos: " + mov + "\nComparaciones: " + com;
+    public static String getMovement() {
+        return "\nMovimientos: " + mov;
+    }
+
+    public static String getComparison() {
+        return "\nComparaciones: " + com;
+    }
+
+    public static void writeFile(String fileName, int[] arr) {
+        try{
+            BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+            for (int number : arr) {
+                String linea = String.format("%d\n", number);
+                writer.write(linea);
+            }
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void writeFile(String fileName, float[] arr) {
+        try{
+            BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+            for (float number : arr) {
+                String linea = String.format("%d\n", number);
+                writer.write(linea);
+            }
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void busquedaSecuencial(int[] A, int dato) {
+        int i = 0;
+        boolean flag = false;
+
+        while (i < A.length && flag == false) {
+            if (A[i] == dato) {
+                flag = true;
+                com++;
+            }
+            i++;
+        }
+        if (flag == true) {
+            JOptionPane.showMessageDialog(null, "El elemento fue encontrado en la posición: " + (i-1));
+        }else{
+            JOptionPane.showMessageDialog(null,  "Elemento no encontrado");
+            return;
+        }
+    }
+
+    public static void displaySearchMenu(int[] A) {
+
+        String menu = "MENU DE BUSQUEDAS\n";
+        menu+="1.- BUSQUEDA SECUENCIAL\n";
+        menu+="2.- BUSQUEDA INDEXADA\n";
+        menu+="3.- BUSQUEDA BINARIA\n";
+
+        int dato = Integer.parseInt(JOptionPane.showInputDialog("Ingresa el valor que deseas buscar"));
+
+        int option;
+
+        do {
+            option = Integer.parseInt(JOptionPane.showInputDialog(menu));
+
+            if(option==1) {
+                busquedaSecuencial(A, dato);
+                return;
+            } else if(option==2) {
+                //busquedaSecuencial(A, dato);
+            } else if(option==3) {
+                //busquedaSecuencial(A, dato);
+            }
+
+        } while (option != 0);
+
     }
 
     public static void main(String []args) {
-        int size = 1000;
+        int size = 500000;
         int arreglo[] = new int[size];
+        int A[] = {1,2,5,32,36,7,8,1,25,7};
 
         float arr[] = new float[size];
 
@@ -269,90 +354,139 @@ public class MetodosDeOrdenamiento {
             arreglo[i] = (int) rand.nextInt(size*size);
         }
 
-        String menu = "MENU DE OPCIONES\n";
-        menu+="1.- INSERCION DIRECTA\n";
-        menu+="2.- SELECCION\n";
-        menu+="3.- BUBBLESORT\n";
-        menu+="4.- QUICKSORT\n";
-        menu+="5.- BINSORT\n";
-        menu+="6.- RADIXSORT\n";
-        menu+="7.- MERGESORT\n";
-        menu+="8.- SHELLSORT\n";
-        menu+="9.- ARBOL BINARIO - SORT\n";
-        menu+="10.- HEAPSORT\n";
-        menu+="0.- SALIR";
+        //leer el archivo de texto creado
+        try { 
+            try (BufferedReader br = new BufferedReader(new FileReader("numeros.txt"))) {
+                String line;
+                final int[] INT_ARRAY = new int[size];
 
-        int op;
+                int index = 0;
+                while ((line = br.readLine()) != null) {
+                    String[] values = line.split(" ");
+                    for (String value : values) {
+                        try {
+                            int intValue = Integer.parseInt(value);
+                            INT_ARRAY[index] = intValue;
+                            index++;
+                        } catch (NumberFormatException e) {
+                            // Si el valor no es un entero válido, ignóralo
+                            System.err.println("Ignorando valor no válido: " + value);
+                        }
+                    }
+                }
 
-        do {
+                String menu = "MENU DE OPCIONES\n";
+                menu+="1.- INSERCION DIRECTA\n";
+                menu+="2.- SELECCION\n";
+                menu+="3.- BUBBLE SORT\n";
+                menu+="4.- QUICK SORT\n";
+                menu+="5.- BIN SORT\n";
+                menu+="6.- RADIX SORT\n";
+                menu+="7.- MERGE SORT\n";
+                menu+="8.- SHELL SORT\n";
+                menu+="9.- ARBOL BINARIO SORT\n";
+                menu+="10.- HEAP SORT\n";
+                menu+="0.- SALIR";
+   
+                int op;
+   
+                do {
+   
+                    op=Integer.parseInt(JOptionPane.showInputDialog(null, menu));
+   
+                    if (op==1) {
+                        long startingTime = System.currentTimeMillis();
+                        int auxArr[] = insertionSort(A);
+                        long endingTime = System.currentTimeMillis();
+                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovement() + getComparison());
+                        writeFile("insertionSort.txt", auxArr);
+                        int dialogButton = JOptionPane.YES_NO_OPTION;
+                        JOptionPane.showConfirmDialog (null, "Quieres hacer una búsqueda?","SEARCH", dialogButton);
+                            if(dialogButton == JOptionPane.YES_OPTION) 
+                            {
+                                int dialogButton2 = JOptionPane.YES_NO_OPTION;
+                                JOptionPane.showConfirmDialog (null, "Quieres hacerla en el arreglo ordenado?"+"\nde lo contrario se realizará la busqueda en el arreglo desordenado","WARNING", dialogButton2);
+                                if (dialogButton2 == JOptionPane.YES_OPTION) {
+                                    displaySearchMenu(auxArr);
+                                } else {
+                                    displaySearchMenu(A);
+                                }
+                            if(dialogButton == JOptionPane.NO_OPTION) 
+                            {
+                                System.exit(0);
+                            }
+              }
+                        displaySearchMenu(auxArr);
+                    } else if (op==2) {
+                        long startingTime = System.currentTimeMillis();
+                        int auxArr[] = selectionSort(INT_ARRAY);
+                        long endingTime = System.currentTimeMillis();
+                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovement() + getComparison());
+                        writeFile("selectionSort.txt", auxArr);
+                    } else if (op==3) {
+                        long startingTime = System.currentTimeMillis();
+                        int auxArr[] = bubbleSort(INT_ARRAY);
+                        long endingTime = System.currentTimeMillis();
+                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovement() + getComparison());
+                        writeFile("bubbleSort.txt", auxArr);
+                    } else if (op==4) {
+                        long startingTime = System.currentTimeMillis();
+                        int auxArr[] = quickSort(INT_ARRAY, 0, size-1);
+                        long endingTime = System.currentTimeMillis();
+                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovement() + getComparison());
+                        writeFile("quickSort.txt", auxArr);
+                    } else if (op==5) {
+                        long startingTime = System.currentTimeMillis();
+                        float auxArr[] = binSort(arr, size-1);
+                        long endingTime = System.currentTimeMillis();
+                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovement() + getComparison());
+                        writeFile("binSort.txt", auxArr);
+                        for (float f : arr) {
+                            System.out.print("["+f+"]");
+                        } 
+                    } else if (op==6) {
+                        long startingTime = System.currentTimeMillis();
+                        int auxArr[] = radixSort(INT_ARRAY);
+                        long endingTime = System.currentTimeMillis();
+                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovement() + getComparison());
+                        writeFile("radixSort.txt", auxArr);
+                    } else if (op==7) {
+                        long startingTime = System.currentTimeMillis();
+                        int auxArr[] = mergeSort(INT_ARRAY);
+                        long endingTime = System.currentTimeMillis();
+                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovement() + getComparison());
+                        writeFile("mergeSort.txt", auxArr);
+                    } else if (op==8) {
+                        long startingTime = System.currentTimeMillis();
+                        int auxArr[] = shellSort(INT_ARRAY);
+                        long endingTime = System.currentTimeMillis();
+                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovement() + getComparison());
+                        writeFile("shellSort.txt", auxArr);
+                    } else if (op==9) {
+                        long startingTime = System.currentTimeMillis();
+                        int auxArr[] = binaryTreeSort(INT_ARRAY);
+                        long endingTime = System.currentTimeMillis();
+                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovement() + getComparison());
+                        writeFile("binaryTreeSort.txt", auxArr);
+                    } else if (op==10) {
+                        long startingTime = System.currentTimeMillis();
+                        int auxArr[] = heapSort(INT_ARRAY);
+                        long endingTime = System.currentTimeMillis();
+                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovement() + getComparison());
+                        writeFile("heapSort.txt", auxArr);
+                    } else if (op==0){
+                        System.exit(0);
+                    }
+                    
+                } while (op!=0);
 
-            op=Integer.parseInt(JOptionPane.showInputDialog(null, menu));
-
-            if (op==1) {
-                long startingTime = System.currentTimeMillis();
-                insertionSort(arreglo);
-                long endingTime = System.currentTimeMillis();
-                JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovAndCom());
-            } else if (op==2) {
-                long startingTime = System.currentTimeMillis();
-                selectionSort(arreglo);
-                long endingTime = System.currentTimeMillis();
-                JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovAndCom());
-            } else if (op==3) {
-                long startingTime = System.currentTimeMillis();
-                bubbleSort(arreglo);
-                long endingTime = System.currentTimeMillis();
-                JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovAndCom());
-            } else if (op==4) {
-                long startingTime = System.currentTimeMillis();
-                quickSort(arreglo, 0, size-1);
-                long endingTime = System.currentTimeMillis();
-                JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovAndCom());
-            } else if (op==5) {
-                long startingTime = System.currentTimeMillis();
-                binSort(arr, size-1);
-                long endingTime = System.currentTimeMillis();
-                JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovAndCom());
-            } else if (op==6) {
-                long startingTime = System.currentTimeMillis();
-                radixSort(arreglo);
-                long endingTime = System.currentTimeMillis();
-                JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovAndCom());
-            } else if (op==7) {
-                long startingTime = System.currentTimeMillis();
-                mergeSort(arreglo);
-                long endingTime = System.currentTimeMillis();
-                JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovAndCom());
-            } else if (op==8) {
-                long startingTime = System.currentTimeMillis();
-                shellSort(arreglo);
-                long endingTime = System.currentTimeMillis();
-                JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovAndCom());
-            } else if (op==9) {
-                long startingTime = System.currentTimeMillis();
-                binaryTreeSort(arreglo);
-                long endingTime = System.currentTimeMillis();
-                JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovAndCom());
-            } else if (op==10) {
-                long startingTime = System.currentTimeMillis();
-                heapSort(arreglo);
-                long endingTime = System.currentTimeMillis();
-                JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovAndCom());
-            } else if (op==0){
-                System.exit(0);
+            } catch (NumberFormatException | HeadlessException e) {
+                e.printStackTrace();
             }
-            
-        } while (op!=0);
 
-        /*
-        for (float f : arr) {
-            System.out.print("["+f+"]");
-        } 
-        
-        for (int i = 0; i < size; i++) {
-            System.out.print("["+arreglo[i]+"]");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        */
 
     }
     
