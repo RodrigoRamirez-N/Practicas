@@ -10,7 +10,7 @@ import javax.swing.JOptionPane;
 
 public class MetodosDeOrdenamiento {
     static int nextPos, currentPos;
-    static long mov, com;
+    static long mov = 0, com = 0;
 
     public static int[] bubbleSort(int A[]) {
         for (int i = 0; i < A.length; i++) 
@@ -98,21 +98,21 @@ public class MetodosDeOrdenamiento {
         return i + 1;
     }
 
-    public static float[] binSort(float A[], int size) {
+    public static int[] binSort(int A[], int size) {
         @SuppressWarnings("unchecked")
-        Vector<Float>[] bins = new Vector[size];
+        Vector<Integer>[] bins = new Vector[size];
 
         for (int i = 0; i < size; i++) {
-            bins[i] = new Vector<Float>();
+            bins[i] = new Vector<Integer>();
         }
 
         // 2) Put array elements in different bins
         for (int i = 0; i < size; i++) {
-            float idx = A[i] * size;
+            int idx = A[i] * size;
             bins[(int)idx].add(A[i]);
         }
 
-        // 3) Concatenate all bins into arr[]
+        // 3) Concatena all bins into arr[]
         int index = 0;
         for (int i = 0; i < size; i++) {
             if (bins[i] != null) {
@@ -257,6 +257,30 @@ public class MetodosDeOrdenamiento {
         return arr;
     }
 
+    public static int[] combSort(int[] arr) {
+        int gap = arr.length;
+        double shrink = 1.3; //std value 
+        boolean swapped;
+        do {
+            gap = (int) (gap / shrink); //partition
+            if (gap < 1) {
+                gap = 1;
+            }
+            swapped = false;
+            for (int i = 0; i + gap < arr.length; i++) {
+                com++;
+                if (arr[i] > arr[i + gap]) {
+                    mov++;
+                    int temp = arr[i];
+                    arr[i] = arr[i + gap];
+                    arr[i + gap] = temp;
+                    swapped = true;
+                }
+            }
+        } while (gap > 1 || swapped);
+        return arr;
+    }
+
     public static String getMovement() {
         return "\nMovimientos: " + mov;
     }
@@ -296,64 +320,57 @@ public class MetodosDeOrdenamiento {
         boolean flag = false;
 
         while (i < A.length && flag == false) {
+            com++;
             if (A[i] == dato) {
                 flag = true;
-                com++;
             }
             i++;
         }
         if (flag == true) {
-            JOptionPane.showMessageDialog(null, "El elemento fue encontrado en la posición: " + (i-1));
+            JOptionPane.showMessageDialog(null, "El elemento fue encontrado en la posición: " + (i-1) + getComparison());
         }else{
-            JOptionPane.showMessageDialog(null,  "Elemento no encontrado");
-            return;
+            JOptionPane.showMessageDialog(null,  "Elemento no encontrado" + getComparison());
         }
     }
 
-    public static void displaySearchMenu(int[] A) {
+    public static int buscarDato(int[] A, int dato) {
+        int lower, upper;
+        lower = 0;
+        upper = A.length-1;
+        return busquedaBinaria(A,dato,lower,upper);
+    }
 
-        String menu = "MENU DE BUSQUEDAS\n";
-        menu+="1.- BUSQUEDA SECUENCIAL\n";
-        menu+="2.- BUSQUEDA INDEXADA\n";
-        menu+="3.- BUSQUEDA BINARIA\n";
+    private static int busquedaBinaria(int[] A, int dato, int lower, int upper) {
+        //estrictamente debe estar ordenado el arreglo
+        int mid;
 
-        int dato = Integer.parseInt(JOptionPane.showInputDialog("Ingresa el valor que deseas buscar"));
-
-        int option;
-
-        do {
-            option = Integer.parseInt(JOptionPane.showInputDialog(menu));
-
-            if(option==1) {
-                busquedaSecuencial(A, dato);
-                return;
-            } else if(option==2) {
-                //busquedaSecuencial(A, dato);
-            } else if(option==3) {
-                //busquedaSecuencial(A, dato);
-            }
-
-        } while (option != 0);
-
+        if (lower <= upper) {
+            mid = (upper + lower)/2 ;
+            com++;
+            if (dato == A[mid]) {
+                //JOptionPane.showMessageDialog(null, "El elemento se encuentra en la posición: " + mid + getComparison());
+                return mid;
+            } else if (dato < A[mid]) {
+                upper = mid-1;
+            } else {
+                lower = mid+1;
+            } //aqui ya cambiaron los valores de lower y upper
+            return busquedaBinaria(A, dato, lower, upper);
+        } else {
+            return -1;
+        }
     }
 
     public static void main(String []args) {
         int size = 500000;
-        int arreglo[] = new int[size];
-        int A[] = {1,2,5,32,36,7,8,1,25,7};
-
-        float arr[] = new float[size];
-
+        //final int arreglo[] = {15,21,13,54,75,68,97,28,19}; // 13,15,19,21,28,54,68,75,97
+        /* 
         Random rand = new Random();
-
-        for (int i = 0; i < size; i++) { //utilizar para binSort y radixSort
-            arr[i] = (float) rand.nextFloat();
-        }
-
+        
         for (int i = 0; i < size; i++) {
             arreglo[i] = (int) rand.nextInt(size*size);
         }
-
+        */
         //leer el archivo de texto creado
         try { 
             try (BufferedReader br = new BufferedReader(new FileReader("numeros.txt"))) {
@@ -386,6 +403,11 @@ public class MetodosDeOrdenamiento {
                 menu+="8.- SHELL SORT\n";
                 menu+="9.- ARBOL BINARIO SORT\n";
                 menu+="10.- HEAP SORT\n";
+                menu+="11.- COMB SORT\n";
+                menu+="12.- BUSQUEDA SECUENCIAL ORDENADA\n";
+                menu+="13.- BUSQUEDA SECUENCIAL NO ORDENADA\n";
+                menu+="14.- BUSQUEDA BINARIA\n";
+                menu+="15.- BUSQUEDA INDEXADA\n";
                 menu+="0.- SALIR";
    
                 int op;
@@ -396,27 +418,10 @@ public class MetodosDeOrdenamiento {
    
                     if (op==1) {
                         long startingTime = System.currentTimeMillis();
-                        int auxArr[] = insertionSort(A);
+                        int auxArr[] = insertionSort(INT_ARRAY);
                         long endingTime = System.currentTimeMillis();
                         JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovement() + getComparison());
                         writeFile("insertionSort.txt", auxArr);
-                        int dialogButton = JOptionPane.YES_NO_OPTION;
-                        JOptionPane.showConfirmDialog (null, "Quieres hacer una búsqueda?","SEARCH", dialogButton);
-                            if(dialogButton == JOptionPane.YES_OPTION) 
-                            {
-                                int dialogButton2 = JOptionPane.YES_NO_OPTION;
-                                JOptionPane.showConfirmDialog (null, "Quieres hacerla en el arreglo ordenado?"+"\nde lo contrario se realizará la busqueda en el arreglo desordenado","WARNING", dialogButton2);
-                                if (dialogButton2 == JOptionPane.YES_OPTION) {
-                                    displaySearchMenu(auxArr);
-                                } else {
-                                    displaySearchMenu(A);
-                                }
-                            if(dialogButton == JOptionPane.NO_OPTION) 
-                            {
-                                System.exit(0);
-                            }
-              }
-                        displaySearchMenu(auxArr);
                     } else if (op==2) {
                         long startingTime = System.currentTimeMillis();
                         int auxArr[] = selectionSort(INT_ARRAY);
@@ -437,13 +442,10 @@ public class MetodosDeOrdenamiento {
                         writeFile("quickSort.txt", auxArr);
                     } else if (op==5) {
                         long startingTime = System.currentTimeMillis();
-                        float auxArr[] = binSort(arr, size-1);
+                        int auxArr[] = binSort(INT_ARRAY, size-1);
                         long endingTime = System.currentTimeMillis();
                         JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovement() + getComparison());
                         writeFile("binSort.txt", auxArr);
-                        for (float f : arr) {
-                            System.out.print("["+f+"]");
-                        } 
                     } else if (op==6) {
                         long startingTime = System.currentTimeMillis();
                         int auxArr[] = radixSort(INT_ARRAY);
@@ -474,7 +476,29 @@ public class MetodosDeOrdenamiento {
                         long endingTime = System.currentTimeMillis();
                         JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovement() + getComparison());
                         writeFile("heapSort.txt", auxArr);
-                    } else if (op==0){
+                    } else if (op==11) {
+                        long startingTime = System.currentTimeMillis();
+                        int auxArr[] = combSort(INT_ARRAY);
+                        long endingTime = System.currentTimeMillis();
+                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovement() + getComparison());
+                        writeFile("combSort.txt", auxArr);    
+                    } else if (op == 12) {
+                        int[] auxArr = mergeSort(INT_ARRAY);
+                        int dato = Integer.parseInt(JOptionPane.showInputDialog("Ingresa el número que quieres encontrar"));
+                        busquedaSecuencial(auxArr, dato);
+                    } else if (op == 13) {
+                        int dato = Integer.parseInt(JOptionPane.showInputDialog("Ingresa el número que quieres encontrar"));
+                        busquedaSecuencial(INT_ARRAY, dato);
+                    } else if (op == 14) {
+                        int dato = Integer.parseInt(JOptionPane.showInputDialog("Ingresa el número que quieres encontrar"));
+                        int posicion = buscarDato(combSort(INT_ARRAY), dato);
+                        if(posicion != -1){ 
+                            JOptionPane.showMessageDialog(null, "El elemento se encuentra en la posición: " + posicion + getComparison());
+                        } else {
+                            JOptionPane.showMessageDialog(null, "El elemento no se encuentra en el arreglo");
+                        }
+                    }
+                     else if (op==0){
                         System.exit(0);
                     }
                     
