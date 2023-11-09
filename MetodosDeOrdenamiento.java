@@ -69,7 +69,7 @@ public class MetodosDeOrdenamiento {
     public static int[] quickSort(int[] A, int left, int right) {
         if (left < right) {
             int pivotIndex = partition(A, left, right);
-            quickSort(A, left, pivotIndex - 1);
+            quickSort(A, left, pivotIndex - 1); //exp pivote
             quickSort(A, pivotIndex + 1, right);
         }
         return A;
@@ -98,33 +98,42 @@ public class MetodosDeOrdenamiento {
         return i + 1;
     }
 
-    public static int[] binSort(int A[], int size) {
+    private static int[] binSort(int[] A, int size) { //BIN SORT FIXED
         @SuppressWarnings("unchecked")
-        Vector<Integer>[] bins = new Vector[size];
 
-        for (int i = 0; i < size; i++) {
-            bins[i] = new Vector<Integer>();
+        List<Integer>[] buckets = new List[size];
+
+        for(int i = 0; i < size; i++)
+        {
+            buckets[i] = new LinkedList<>();
         }
-
-        // 2) Put array elements in different bins
-        for (int i = 0; i < size; i++) {
-            int idx = A[i] * size;
-            bins[(int)idx].add(A[i]);
+        //calcula el valor hash asignado a cada elemento en el array
+        for(int num : A)
+        {
+            buckets[hash(num, size)].add(num);  //esto estaba mal al calcular el valor hash en el metodo anterior utilizaba el index por el valor 
+        }                                       //y se asignaba al index provocando un index out of bounds
+        //itera sobre los bins y los ordena     //quick sort no pude encontrar el error... aun me falta agregar los contadores en su posicion
+        for(List<Integer> bucket : buckets)
+        {
+        //ordena los bins
+            Collections.sort(bucket);
         }
-
-        // 3) Concatena all bins into arr[]
         int index = 0;
-        for (int i = 0; i < size; i++) {
-            if (bins[i] != null) {
-                //Collections.sort(bins[i]);
-                for (int j = 0; j < bins[i].size(); j++) {
-                    A[index++] = bins[i].get(j);
-                }
-                com += bins[i].size() - 1;
-                mov += bins[i].size() - 1;
+        //Reunir los bins despues de ordenarlos
+        for(List<Integer> bucket : buckets)
+        {
+            for(int num : bucket)
+            {
+                mov++;
+                A[index++] = num;
             }
         }
         return A;
+    }
+
+    //calculo de hash
+    private static int hash(int num, int bucketSize) {  
+        return num/bucketSize;
     }
 
     public static int[] mergeSort(int[] arr) {
@@ -270,10 +279,10 @@ public class MetodosDeOrdenamiento {
             for (int i = 0; i + gap < arr.length; i++) {
                 com++;
                 if (arr[i] > arr[i + gap]) {
-                    mov++;
                     int temp = arr[i];
                     arr[i] = arr[i + gap];
                     arr[i + gap] = temp;
+                    mov++;
                     swapped = true;
                 }
             }
@@ -302,7 +311,7 @@ public class MetodosDeOrdenamiento {
         }
     }
 
-    public static void writeFile(String fileName, float[] arr) {
+    public static void writeFile(String fileName, float[] arr) { //METODO QUE ESCRIBE UN ARCHIVO (YA CREADO)
         try{
             BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
             for (float number : arr) {
@@ -315,7 +324,86 @@ public class MetodosDeOrdenamiento {
         }
     }
 
-    public static void busquedaSecuencial(int[] A, int dato) {
+    public static ElemIndice[] crearArrayIndice(int k, int[]A){ //este metodo ya no lo estoy usando.
+        int n_indices;
+        int n = A.length;
+        // Asegura que todos los elementos se incluyan
+        if (n%k== 0) {
+            n_indices = n/k;
+        } else {
+            n_indices = n/k + 1;
+        }    
+
+        ElemIndice[] arrayIndice = new ElemIndice[n_indices];
+        int cont = 0;
+        for (int i = 0; i < n_indices; i++) { 
+            int endIndex = Math.min(cont + k, n);
+            arrayIndice[i]= new ElemIndice(A[cont],cont);
+            cont = endIndex; 
+        }
+        return arrayIndice;
+    }
+
+    public static int indexedSequentialSearch(int arr[], int n, int dato) { //misma logica de busqueda implementando banderas para evitar excepciones 
+        int elements[] = new int[n];
+        int indices[] = new int[n];
+        int i;
+        int j = 0, ind = 0, start = 0, end = 0, set = 0;
+        for (i = 0; i < n; i+=3) {
+ 
+            // ordenando elementos 
+            elements[ind] = arr[i];
+ 
+            // ordenando los indices
+            indices[ind] = i;
+            ind++;
+        }
+        if (dato < elements[0]) {
+            System.out.println("dato menor que first elem invalid");
+            return -1;
+        } else {
+            for (i = 1; i <= ind; i++) //i=0 validado
+                if (dato <= elements[i]) { //validando el valor max  en elementos con valor a buscar para asignar el numero de indices a inicio y fin
+                    start = indices[i - 1];
+                    set = 1; //flag para rango valido en la busqueda
+                    end = indices[i];
+                    break;
+                }
+        }
+        if (set == 0) { //si el valor a buscar resultó ser mayor que todos los elems entonces inicia en el ultimo indice valido y finaliza en A.length
+            start = indices[i - 1];
+            end = n;
+        }
+        for (i = start; i <= end; i++) {
+            if (dato == arr[i]) {
+                j = 1; //found flag
+                break;
+            }
+        }
+        if (j == 1) {
+            System.out.println("Found at index " + i);
+            return i;
+        }else {
+            System.out.println("Not found");
+            return -1;
+        }
+    }
+
+    public static int busquedaIndexada(int k, int[] A, int dato) {
+        ElemIndice[] arrayIndice = crearArrayIndice(k, A);
+        int position = -1; // Valor predeterminado si no se encuentra
+
+        for (ElemIndice elem : arrayIndice) {
+            com++;
+            if (elem.getClave() == dato) {
+                position = elem.getPosicion();
+                break;
+            }
+        }
+        return position;
+    }
+
+    public static int busquedaSecuencialNoOrdenada(int[] A, int dato) {
         int i = 0;
         boolean flag = false;
 
@@ -323,14 +411,29 @@ public class MetodosDeOrdenamiento {
             com++;
             if (A[i] == dato) {
                 flag = true;
+                return i;
             }
             i++;
         }
-        if (flag == true) {
-            JOptionPane.showMessageDialog(null, "El elemento fue encontrado en la posición: " + (i-1) + getComparison());
-        }else{
-            JOptionPane.showMessageDialog(null,  "Elemento no encontrado" + getComparison());
+        return -1;
+    }
+
+    public static int busquedaSecuencialOrdenada(int[] A, int dato) {
+        int i = 0;
+        boolean flag = false;
+
+        while (i < A.length && flag == false) {
+            com++;
+            if (A[i] == dato) {
+                flag = true;
+                return i;
+            }else if (A[i] > dato) {
+                break;
+            }
+            i++;
         }
+        flag=true;
+        return -1;
     }
 
     public static int buscarDato(int[] A, int dato) {
@@ -362,21 +465,21 @@ public class MetodosDeOrdenamiento {
     }
 
     public static void main(String []args) {
-        int size = 500000;
+        int size = 500_000;
         //final int arreglo[] = {15,21,13,54,75,68,97,28,19}; // 13,15,19,21,28,54,68,75,97
-        /* 
+        /*int[] arreglo = new int[size];
         Random rand = new Random();
         
         for (int i = 0; i < size; i++) {
-            arreglo[i] = (int) rand.nextInt(size*size);
+            arreglo[i] = (int) rand.nextInt(size*3);
         }
-        */
+        writeFile("numeros.txt", arreglo);*/
+
         //leer el archivo de texto creado
         try { 
             try (BufferedReader br = new BufferedReader(new FileReader("numeros.txt"))) {
                 String line;
                 final int[] INT_ARRAY = new int[size];
-
                 int index = 0;
                 while ((line = br.readLine()) != null) {
                     String[] values = line.split(" ");
@@ -387,7 +490,7 @@ public class MetodosDeOrdenamiento {
                             index++;
                         } catch (NumberFormatException e) {
                             // Si el valor no es un entero válido, ignóralo
-                            System.err.println("Ignorando valor no válido: " + value);
+                            System.err.println("Valor inválido: " + value);
                         }
                     }
                 }
@@ -404,8 +507,8 @@ public class MetodosDeOrdenamiento {
                 menu+="9.- ARBOL BINARIO SORT\n";
                 menu+="10.- HEAP SORT\n";
                 menu+="11.- COMB SORT\n";
-                menu+="12.- BUSQUEDA SECUENCIAL ORDENADA\n";
-                menu+="13.- BUSQUEDA SECUENCIAL NO ORDENADA\n";
+                menu+="12.- BUSQUEDA SECUENCIAL NO ORDENADA\n";
+                menu+="13.- BUSQUEDA SECUENCIAL ORDENADA\n";
                 menu+="14.- BUSQUEDA BINARIA\n";
                 menu+="15.- BUSQUEDA INDEXADA\n";
                 menu+="0.- SALIR";
@@ -420,80 +523,101 @@ public class MetodosDeOrdenamiento {
                         long startingTime = System.currentTimeMillis();
                         int auxArr[] = insertionSort(INT_ARRAY);
                         long endingTime = System.currentTimeMillis();
-                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovement() + getComparison());
+                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms.\n" + getMovement() + getComparison());
                         writeFile("insertionSort.txt", auxArr);
                     } else if (op==2) {
                         long startingTime = System.currentTimeMillis();
                         int auxArr[] = selectionSort(INT_ARRAY);
                         long endingTime = System.currentTimeMillis();
-                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovement() + getComparison());
+                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms.\n" + getMovement() + getComparison());
                         writeFile("selectionSort.txt", auxArr);
                     } else if (op==3) {
                         long startingTime = System.currentTimeMillis();
                         int auxArr[] = bubbleSort(INT_ARRAY);
                         long endingTime = System.currentTimeMillis();
-                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovement() + getComparison());
+                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms.\n" + getMovement() + getComparison());
                         writeFile("bubbleSort.txt", auxArr);
                     } else if (op==4) {
                         long startingTime = System.currentTimeMillis();
                         int auxArr[] = quickSort(INT_ARRAY, 0, size-1);
                         long endingTime = System.currentTimeMillis();
-                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovement() + getComparison());
+                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms.\n" + getMovement() + getComparison());
                         writeFile("quickSort.txt", auxArr);
                     } else if (op==5) {
                         long startingTime = System.currentTimeMillis();
-                        int auxArr[] = binSort(INT_ARRAY, size-1);
+                        int auxArr[] = binSort(INT_ARRAY, size);
                         long endingTime = System.currentTimeMillis();
-                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovement() + getComparison());
+                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms.\n" + getMovement() + getComparison());
                         writeFile("binSort.txt", auxArr);
                     } else if (op==6) {
                         long startingTime = System.currentTimeMillis();
                         int auxArr[] = radixSort(INT_ARRAY);
                         long endingTime = System.currentTimeMillis();
-                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovement() + getComparison());
+                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms.\n" + getMovement() + getComparison());
                         writeFile("radixSort.txt", auxArr);
                     } else if (op==7) {
                         long startingTime = System.currentTimeMillis();
                         int auxArr[] = mergeSort(INT_ARRAY);
                         long endingTime = System.currentTimeMillis();
-                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovement() + getComparison());
+                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms.\n" + getMovement() + getComparison());
                         writeFile("mergeSort.txt", auxArr);
                     } else if (op==8) {
                         long startingTime = System.currentTimeMillis();
                         int auxArr[] = shellSort(INT_ARRAY);
                         long endingTime = System.currentTimeMillis();
-                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovement() + getComparison());
+                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms.\n" + getMovement() + getComparison());
                         writeFile("shellSort.txt", auxArr);
                     } else if (op==9) {
                         long startingTime = System.currentTimeMillis();
                         int auxArr[] = binaryTreeSort(INT_ARRAY);
                         long endingTime = System.currentTimeMillis();
-                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovement() + getComparison());
+                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms.\n" + getMovement() + getComparison());
                         writeFile("binaryTreeSort.txt", auxArr);
                     } else if (op==10) {
                         long startingTime = System.currentTimeMillis();
                         int auxArr[] = heapSort(INT_ARRAY);
                         long endingTime = System.currentTimeMillis();
-                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovement() + getComparison());
+                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms.\n" + getMovement() + getComparison());
                         writeFile("heapSort.txt", auxArr);
                     } else if (op==11) {
                         long startingTime = System.currentTimeMillis();
                         int auxArr[] = combSort(INT_ARRAY);
                         long endingTime = System.currentTimeMillis();
-                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms\n" + getMovement() + getComparison());
+                        JOptionPane.showMessageDialog(null, "Tiempo de ejecución: " + (endingTime-startingTime) + " ms.\n" + getMovement() + getComparison());
                         writeFile("combSort.txt", auxArr);    
                     } else if (op == 12) {
+                        int dato = Integer.parseInt(JOptionPane.showInputDialog("Ingresa el número que quieres encontrar"));
+                        int pos = busquedaSecuencialNoOrdenada(INT_ARRAY, dato);
+                        if(pos != -1){ 
+                            JOptionPane.showMessageDialog(null, "El elemento se encuentra en la posición: " + pos + getComparison());
+                        } else {
+                            JOptionPane.showMessageDialog(null, "El elemento no se encuentra en el arreglo");
+                        }
+                        
+                    } else if (op == 13) {
                         int[] auxArr = mergeSort(INT_ARRAY);
                         int dato = Integer.parseInt(JOptionPane.showInputDialog("Ingresa el número que quieres encontrar"));
-                        busquedaSecuencial(auxArr, dato);
-                    } else if (op == 13) {
-                        int dato = Integer.parseInt(JOptionPane.showInputDialog("Ingresa el número que quieres encontrar"));
-                        busquedaSecuencial(INT_ARRAY, dato);
+                        int pos = busquedaSecuencialOrdenada(auxArr, dato);
+                        if(pos != -1){ 
+                            JOptionPane.showMessageDialog(null, "El elemento se encuentra en la posición: " + pos + getComparison());
+                        } else {
+                            JOptionPane.showMessageDialog(null, "El elemento no se encuentra en el arreglo");
+                        }
+                        
                     } else if (op == 14) {
                         int dato = Integer.parseInt(JOptionPane.showInputDialog("Ingresa el número que quieres encontrar"));
-                        int posicion = buscarDato(combSort(INT_ARRAY), dato);
-                        if(posicion != -1){ 
-                            JOptionPane.showMessageDialog(null, "El elemento se encuentra en la posición: " + posicion + getComparison());
+                        int pos = buscarDato(combSort(INT_ARRAY), dato);
+                        if(pos != -1){ 
+                            JOptionPane.showMessageDialog(null, "El elemento se encuentra en la posición: " + pos + getComparison());
+                        } else {
+                            JOptionPane.showMessageDialog(null, "El elemento no se encuentra en el arreglo");
+                        }
+                        
+                    } else if (op == 15) {
+                        int dato = Integer.parseInt(JOptionPane.showInputDialog("Ingresa el número que quieres encontrar"));
+                        int pos = indexedSequentialSearch(mergeSort(INT_ARRAY),INT_ARRAY.length, dato);
+                        if(pos != -1){ 
+                            JOptionPane.showMessageDialog(null, "El elemento se encuentra en la posición: " + pos + getComparison());
                         } else {
                             JOptionPane.showMessageDialog(null, "El elemento no se encuentra en el arreglo");
                         }
