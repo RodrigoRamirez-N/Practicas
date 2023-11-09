@@ -111,8 +111,9 @@ public class MetodosDeOrdenamiento {
         for(int num : A)
         {
             buckets[hash(num, size)].add(num);  //esto estaba mal al calcular el valor hash en el metodo anterior utilizaba el index por el valor 
-        }                                       //y se asignaba al index provocando un index out of bounds
-        //itera sobre los bins y los ordena     //quick sort no pude encontrar el error... aun me falta agregar los contadores en su posicion
+            mov++                                //y se asignaba al index provocando un index out of bounds
+        }                                       
+        //itera sobre los bins y los ordena    
         for(List<Integer> bucket : buckets)
         {
         //ordena los bins
