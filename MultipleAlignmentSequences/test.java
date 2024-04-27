@@ -97,7 +97,7 @@ public class test {
             // Comparar los caracteres de cada fila en la misma columna
             char c1 = matriz[0].length > j ? matriz[0][j] : 0; // Carácter de la primera fila
             char c2 = matriz[1].length > j ? matriz[1][j] : 0; // Carácter de la segunda fila
-            char c3 = matriz[2].length > j ? matriz[2][j] : 0; // Carácter de la segunda fila
+            char c3 = matriz[2].length > j ? matriz[2][j] : 0; // Carácter de la tercera fila
 
             if (compareChars(c1, c2, c3)) { // Si coinciden los caracteres, sumar el puntaje de match
                 puntaje += 2;
@@ -132,7 +132,7 @@ public class test {
         char bestMatriz[][] = new char[0][0];
         int maxPuntaje = Integer.MIN_VALUE;
 
-        for (int i = 0; i < 10 - bestMatrices.size(); i++) {
+        for (int i = 0; i < 10 - bestMatrices.size(); i++) { //cantidad de iteraciones puede variar dependiendo a la mejora deseada
             System.out.println("Matriz "+i);
             for (int j = 0; j < matriz.length; j++) {
                 for (int k = 0; k < matriz[j].length; k++) {
